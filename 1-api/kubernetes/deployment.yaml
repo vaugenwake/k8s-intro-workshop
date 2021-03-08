@@ -38,5 +38,6 @@ spec:
     app: goapi
   ports:
       # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
-    - port: 80
+    - protocol: TCP
+      port: 80
       targetPort: 3000
