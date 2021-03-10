@@ -20,9 +20,41 @@ jobs:
       - name: Get commit sha
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+      
+      - name: Install Dependencies
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        
+      - name: Generate key
+        run: php artisan key:generate
+        
+      - name: Directory Permissions
+        run: chmod -R 777 storage bootstrap/cache
+      - name: Create Database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+          
+      - name: Execute tests via PestPHP
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: vendor/bin/phpunit
+
       - name: Build Test Image
         if: github.event_name == 'pull_request'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/Dockerfile .
 
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
@@ -30,7 +62,7 @@ jobs:
 
       - name: Build Release Image
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/Dockerfile .
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
