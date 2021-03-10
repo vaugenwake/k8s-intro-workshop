@@ -47,7 +47,7 @@ jobs:
 
       - name: Build Release Image
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: docker build -t docker.pkg.github.com/${{ github.repository }}/goapi:${{ steps.tag_version.outputs.new_version }} .
+        run: docker build -t docker.pkg.github.com/${{ github.repository }}/goapi:${{ steps.tag_version.outputs.new_version }} -f ./docker/Dockerfile .
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
