@@ -39,7 +39,7 @@ jobs:
           name: vendor-artifacts
           retention-days: 2
           path: |
-            vendor
+            vendor/
         
       - name: Generate key
         run: php artisan key:generate
