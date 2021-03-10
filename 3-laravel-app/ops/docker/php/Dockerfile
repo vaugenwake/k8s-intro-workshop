@@ -1,4 +1,4 @@
-FROM php:fpm-alpine
+FROM vaugenwake/laravel:latest
 
 WORKDIR /var/www/html
 

@@ -18,7 +18,7 @@ spec:
           name: nginx-config
       containers:
       - name: nginx
-        image: registry.digitalocean.com/tradigital/laravel-nginx:3eba7366
+        image: nginx:stable-alpine
         volumeMounts:
           - mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf
@@ -26,7 +26,7 @@ spec:
         ports:
           - containerPort: 80
       - name: laravel-app
-        image: registry.digitalocean.com/tradigital/laravel:3eba7366
+        image: registry.digitalocean.com/tradigital/laravel:9449a435
         resources:
           limits:
             memory: "128Mi"
