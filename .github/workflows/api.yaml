@@ -29,7 +29,7 @@ jobs:
 
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: docker login registry.digitalocean.com -u ${{ secrets.DO_REGISTRY_TOKEN }} --p ${{ secrets.DO_REGISTRY_TOKEN }}
 
       - name: Build Release Image
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -37,4 +37,4 @@ jobs:
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: docker push docker.pkg.github.com/${{ github.repository }}/goapi:${SHORT_SHA}
+        run: docker push registry.digitalocean.com/tradigital/goapi:${SHORT_SHA}
