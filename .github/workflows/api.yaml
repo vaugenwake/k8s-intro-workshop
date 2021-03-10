@@ -19,27 +19,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
+      - name: Get commit sha
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Build Test Image
         if: github.event_name == 'pull_request'
-        run: docker build -t vaugenwake/goapi:pull_request .
-
-      - name: Bump version and push tag
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v5.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create a GitHub release
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+        run: docker build -t registry.digitalocean.com/tradigital/goapi:${SHORT_SHA} -f ./docker/Dockerfile .
 
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -47,8 +33,8 @@ jobs:
 
       - name: Build Release Image
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: docker build -t docker.pkg.github.com/${{ github.repository }}/goapi:${{ steps.tag_version.outputs.new_version }} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/goapi:${SHORT_SHA} -f ./docker/Dockerfile .
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: docker push docker.pkg.github.com/${{ github.repository }}/goapi:${{ steps.tag_version.outputs.new_version }}
+        run: docker push docker.pkg.github.com/${{ github.repository }}/goapi:${SHORT_SHA}
