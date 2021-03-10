@@ -17,8 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Get commit sha
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Cache Composer packages
         id: composer-cache
@@ -32,65 +32,34 @@ jobs:
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
-
-      - name: Archive vendor artifacts
-        uses: actions/upload-artifact@v2
+      
+      - name: Download vendor artifacts
+        uses: actions/download-artifact@v2
         with:
           name: vendor-artifacts
-          retention-days: 2
-          path: '**/vendor'
-        
-      - name: Generate key
-        run: php artisan key:generate
-        
-      - name: Directory Permissions
-        run: chmod -R 777 storage bootstrap/cache
-      - name: Create Database
+
+      - name: Build Test Image (Laravel)
+        if: github.event_name == 'pull_request'
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
+
+      - name: Build Test Image (Nginx)
+        if: github.event_name == 'pull_request'
+        run: docker build -t registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
+
+      - name: Docker Login
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        run: docker login registry.digitalocean.com -u ${{ secrets.DO_REGISTRY_TOKEN }} -p ${{ secrets.DO_REGISTRY_TOKEN }}
+
+      - name: Build Release Image (Laravel)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
+
+      - name: Build Release Image (Nginx)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        run: docker build -t registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
+
+      - name: Push image to docker hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
         run: |
-          mkdir -p database
-          touch database/database.sqlite
-          
-      - name: Execute tests via PestPHP
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
-        run: vendor/bin/phpunit
-
-  # build:
-  #     name: 'Build and Push'
-  #     runs-on: ubuntu-latest
-  #     needs: test
-  #     steps:
-  #       - name: Get commit sha
-  #         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
-        
-  #       - name: Download vendor artifacts
-  #         uses: actions/download-artifact@v2
-  #         with:
-  #           name: vendor-artifacts
-
-  #       - name: Build Test Image (Laravel)
-  #         if: github.event_name == 'pull_request'
-  #         run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
-
-  #       - name: Build Test Image (Nginx)
-  #         if: github.event_name == 'pull_request'
-  #         run: docker build -t registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
-
-  #       - name: Docker Login
-  #         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-  #         run: docker login registry.digitalocean.com -u ${{ secrets.DO_REGISTRY_TOKEN }} -p ${{ secrets.DO_REGISTRY_TOKEN }}
-
-  #       - name: Build Release Image (Laravel)
-  #         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-  #         run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
-
-  #       - name: Build Release Image (Nginx)
-  #         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-  #         run: docker build -t registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
-
-  #       - name: Push image to docker hub
-  #         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-  #         run: |
-  #           docker push registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} &&
-  #           docker push registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA}
+          docker push registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} &&
+          docker push registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA}
