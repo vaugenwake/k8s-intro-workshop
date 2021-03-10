@@ -54,7 +54,7 @@ jobs:
 
       - name: Build Test Image
         if: github.event_name == 'pull_request'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/Dockerfile .
 
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build Release Image
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/Dockerfile .
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
