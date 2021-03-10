@@ -35,11 +35,11 @@ jobs:
 
       - name: Build Test Image (Laravel)
         if: github.event_name == 'pull_request'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel/app:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
 
       - name: Build Test Image (Nginx)
         if: github.event_name == 'pull_request'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel/nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
 
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
@@ -47,14 +47,14 @@ jobs:
 
       - name: Build Release Image (Laravel)
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel/app:${SHORT_SHA} -f ./ops/docker/php/Dockerfile .
 
       - name: Build Release Image (Nginx)
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: docker build -t registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel/nginx:${SHORT_SHA} -f ./ops/docker/nginx/Dockerfile .
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
         run: |
-          docker push registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} &&
-          docker push registry.digitalocean.com/tradigital/laravel-nginx:${SHORT_SHA}
+          docker push registry.digitalocean.com/tradigital/laravel/app:${SHORT_SHA} &&
+          docker push registry.digitalocean.com/tradigital/laravel/nginx:${SHORT_SHA}
