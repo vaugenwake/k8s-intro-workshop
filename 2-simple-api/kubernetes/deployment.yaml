@@ -19,9 +19,10 @@ spec:
       labels:
         app: goapi
     spec:
+      imagePullSecrets:
+        - name: github-registry-token
       containers:
       - name: goapi
-        imagePullPolicy: Never
-        image: docker.io/vaugenwake/goapi:latest
+        image: docker.pkg.github.com/vaugenwake/k8s-intro-workshop/goapi:0.0.2
         ports:
         - containerPort: 3000
