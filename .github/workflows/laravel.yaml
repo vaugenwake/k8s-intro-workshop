@@ -10,8 +10,8 @@ defaults:
 
 
 jobs:
-  test:
-    name: 'Run tests'
+  build:
+    name: 'Build images'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,11 +32,6 @@ jobs:
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
-      
-      - name: Download vendor artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: vendor-artifacts
 
       - name: Build Test Image (Laravel)
         if: github.event_name == 'pull_request'
