@@ -20,6 +20,9 @@ jobs:
       - name: Get commit sha
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v2
