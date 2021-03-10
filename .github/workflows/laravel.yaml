@@ -1,4 +1,4 @@
-name: 'Build API Image'
+name: 'Build Laravel Image'
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
 
 defaults:
   run:
-    working-directory: 2-simple-api
+    working-directory: 3-laravel-app
 
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Build Test Image
         if: github.event_name == 'pull_request'
-        run: docker build -t registry.digitalocean.com/tradigital/goapi:${SHORT_SHA} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./docker/Dockerfile .
 
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
@@ -30,8 +30,8 @@ jobs:
 
       - name: Build Release Image
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: docker build -t registry.digitalocean.com/tradigital/goapi:${SHORT_SHA} -f ./docker/Dockerfile .
+        run: docker build -t registry.digitalocean.com/tradigital/laravel:${SHORT_SHA} -f ./docker/Dockerfile .
 
       - name: Push image to docker hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: docker push registry.digitalocean.com/tradigital/goapi:${SHORT_SHA}
+        run: docker push registry.digitalocean.com/tradigital/laravel:${SHORT_SHA}
