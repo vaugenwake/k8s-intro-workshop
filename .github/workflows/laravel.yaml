@@ -32,13 +32,13 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      # - name: Archive vendor artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: vendor-artifacts
-      #     retention-days: 2
-      #     path: |
-      #       vendor/
+      - name: Archive vendor artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: vendor-artifacts
+          retention-days: 2
+          path: |
+            vendor/
         
       - name: Generate key
         run: php artisan key:generate
