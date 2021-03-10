@@ -8,4 +8,4 @@ COPY . .
 RUN docker-php-ext-install bcmath
 RUN docker-php-ext-install pdo_mysql
 
-EXPOSE 9000
+# EXPOSE 9000
