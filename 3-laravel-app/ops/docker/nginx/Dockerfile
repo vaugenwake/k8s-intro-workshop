@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM vaugenwake/laravel:latest
 
 WORKDIR /var/www/html
 
