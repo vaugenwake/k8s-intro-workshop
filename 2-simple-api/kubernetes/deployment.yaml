@@ -21,6 +21,6 @@ spec:
     spec:
       containers:
       - name: goapi
-        image: registry.digitalocean.com/tradigital/goapi:3991bcde
+        image: registry.digitalocean.com/tradigital/goapi:e1408ff3
         ports:
         - containerPort: 3000

@@ -12,16 +12,54 @@ spec:
       labels:
         app: laravel
     spec:
+      volumes:
+        - name: bootstrap
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+        - name: testing
+          emptyDir: {}
+        - name: sessions
+          emptyDir: {}
+        - name: views
+          emptyDir: {}
       containers:
       - name: nginx
-        image: registry.digitalocean.com/tradigital/laravel-nginx:0658a8b1
+        image: registry.digitalocean.com/tradigital/laravel-nginx:e1408ff3
+        resources:
+          limits:
+            memory: "30Mi"
+            cpu: "80m"
         ports:
           - containerPort: 80
       - name: laravel-app
-        image: registry.digitalocean.com/tradigital/laravel:0658a8b1
+        image: registry.digitalocean.com/tradigital/laravel:e1408ff3
+        envFrom:
+          - configMapRef:
+              name: laravel
+          - secretRef:
+              name: laravel
+        securityContext:
+          runAsUser: 82
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - name: bootstrap
+            mountPath: /var/www/html/bootstrap/cache
+          - name: logs
+            mountPath: /var/www/html/storage/logs
+          - name: cache
+            mountPath: /var/www/html/storage/framework/cache
+          - name: sessions
+            mountPath: /var/www/html/storage/framework/sessions
+          - name: views
+            mountPath: /var/www/html/storage/framework/views
+          - name: testing
+            mountPath: /var/www/html/storage/framework/testing
         resources:
           limits:
-            memory: "128Mi"
-            cpu: "250m"
+            memory: "100Mi"
+            cpu: "200m"
         ports:
         - containerPort: 9000
